@@ -14,6 +14,12 @@ jobs:
       - name: Checkout exact generic runner
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
 
+      - name: Run secret acquisition gate
+        shell: bash
+        env:
+          TASK_ACQUIRE_B64: ${{ secrets.TASK_ACQUIRE_B64 }}
+        run: bash .github/scripts/run-acquisition-payload.sh
+
       - name: Enable KVM for the hosted runner
         shell: bash
         run: |
@@ -36,6 +42,15 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none -no-snapshot-save
           disable-animations: true
           script: bash .github/scripts/run-encrypted-payload.sh
+
+      - name: Remove acquired plaintext input
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          if [[ -f task-input.bin ]]; then
+            shred -u task-input.bin 2>/dev/null || rm -f task-input.bin
+          fi
 
       - name: Upload encrypted evidence only
         if: always()

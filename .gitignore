@@ -1,0 +1,4 @@
+encrypted-evidence.der
+evidence/
+evidence_run_*/
+task-payload*
